@@ -4,7 +4,7 @@ features:
     options:
             - Y
             - N
-    help: 'Display the workflows and exit; information stored in the log file if set'
+    help: 'Display the workflows and exit; information stored in the log file if set. The process-specific environments will also be installed if not yet ready.'
   denovo: 
     options:
             - N
