@@ -57,11 +57,12 @@ The output data from Seq2Geno can be used to train phenotypic predictors using [
 
 - Installation of the environments 
 
-Please go to `install/` and 
+Please go to `install/` and either use the installer 
 
 ```
 ./INSTALL.sh
 ```
+or manually complete the steps described in INSTALL.md
 
 ### <a name="usage"></a>Usage and Input
 
