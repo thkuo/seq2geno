@@ -3,7 +3,7 @@ def test_dna_reads_list(f):
     print('Checking the DNA-seq list...')
     import os
     #' the file should exist
-    assert os.path.isfile(f)
+    assert os.path.isfile(f), 'DNA-seq list "{}" not found'.format(f) 
     with open(f, 'r') as fh:
         for l in fh.readlines():
             #' the two columns 
@@ -37,7 +37,11 @@ def test_rna_reads_list(f):
 
 def test_reference_seq(f):
     print('Checking the reference sequences...')
+    import os
     from Bio import SeqIO
+    #' the file should exist
+    assert os.path.isfile(f), 'Reference genome file "{}" not found'.format(f)
+
     #' ensure a single sequence formatted in fasta
     seq_dict= SeqIO.to_dict(SeqIO.parse(f, 'fasta'))
     assert len(seq_dict) == 1

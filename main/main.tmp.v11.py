@@ -4,16 +4,16 @@
 #' Determine, initiate and launch the workflows based on user-defined
 #' arguments
 
-def main(args):
+
+def filter_procs(args):
     import sys
-    from tqdm import tqdm
     import os
     from SGProcesses import SGProcess
 
     config_files= {}
     try:
         ## accept config files
-        if args.old_config:
+        if args.old_config == 'Y':
             print('Skip creating config files. '
                   'Old config files will be used if found')
         else:
@@ -30,60 +30,90 @@ def main(args):
     ## initiate processes
 
     ## expr
-    if args.rna_reads != '-' and args.expr:
-        all_processes.append(SGProcess(args.wd,
-                      'expr', config_f= config_files['expr'], 
-                      dryrun= args.dryrun, 
-                      max_cores=
-                      int(args.cores)))
+    if args.expr == 'Y':
+        #' ensure required data
+        assert os.path.isfile(args.rna_reads)
+        all_processes.append(SGProcess(
+            args.wd, 'expr', 
+            config_f= config_files['expr'], 
+            dryrun= args.dryrun, 
+            mem_mb= int(args.mem_mb), 
+            max_cores=int(args.cores)))
     else:
         print('Skip counting expression levels')
 
     ## snps
-    if args.dna_reads != '-' and args.snps:
+    if args.snps == 'Y':
+        #' ensure required data
+        assert os.path.isfile(args.dna_reads)
         all_processes.append(SGProcess(args.wd,
                       'snps', config_f= config_files['snps'], 
                       dryrun= args.dryrun, 
+                      mem_mb= int(args.mem_mb), 
                       max_cores=int(args.cores)))
     else:
         print('Skip calling single nucleotide variants')
 
     ## denovo
-    if args.dna_reads != '-' and args.denovo:
+    if args.denovo == 'Y':
+        #' ensure required data
+        assert os.path.isfile(args.dna_reads)
         all_processes.append(SGProcess(args.wd,
                       'denovo', config_f= config_files['denovo'], 
                       dryrun= args.dryrun, 
+                      mem_mb= int(args.mem_mb), 
                       max_cores=int(args.cores)))
     else:
         print('Skip creating de novo assemblies')
 
     ## phylo
-    if args.dna_reads != '-' and args.phylo:
+    if args.phylo == 'Y':
+        #' ensure required data
+        assert os.path.isfile(args.dna_reads)
         all_processes.append(SGProcess(args.wd,
                       'phylo', config_f= config_files['phylo'], 
                       dryrun= args.dryrun, 
+                      mem_mb= int(args.mem_mb), 
                       max_cores=int(args.cores)))
     else:
         print('Skip inferring phylogeny')
 
     ## ancestral reconstruction
-    if not args.dryrun and args.dna_reads != '-' and args.rna_reads != '-' and args.ar:
+    if args.ar == 'Y':
+        #' ensure required data
+        assert (os.path.isfile(args.dna_reads) and 
+            os.path.isfile(args.rna_reads) and 
+            args.dryrun != 'Y') 
         all_processes.append(SGProcess(args.wd,
                        'ar', config_f= config_files['ar'], 
                        dryrun= args.dryrun, 
+                      mem_mb= int(args.mem_mb), 
                        max_cores=int(args.cores)))
     else:
         print('Skip ancestral reconstruction')
 
     ## differential expression
-    if  not args.dryrun and args.phe_table != '-' and args.rna_reads != '-' and args.de:
+    if args.de == 'Y':
+        #' ensure required data
+        assert (os.path.isfile(args.phe_table) and 
+            os.path.isfile(args.rna_reads) and 
+            args.dryrun != 'Y') 
         all_processes.append(SGProcess(args.wd,
                       'de', config_f= config_files['de'], 
                        dryrun= args.dryrun, 
+                      mem_mb= int(args.mem_mb), 
                        max_cores=int(args.cores)))
     else:
         print('Skip differential expression analysis')
 
+    return({'selected': all_processes, 'config_files': config_files})
+
+def main(args):
+    from tqdm import tqdm
+    import sys
+    determined_procs= filter_procs(args)
+    config_files= determined_procs['config_files']
+    all_processes= determined_procs['selected']
     ##>>>
     ## start running processes
     try:
@@ -102,6 +132,7 @@ def main(args):
         print('Working directory {} {}'.format(
             args.wd, 'updated' if not args.dryrun else 'unchanged'))
         pbar.update(1)
+        print('\n---\n')
 
     pbar.close()
 

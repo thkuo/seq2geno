@@ -1,16 +1,35 @@
 #' Role: Workers
 #' Purpose: Define the class of workflow
 class SGProcess:
-    def __init__(self, wd, proc, config_f, dryrun= True, max_cores= 1):
+    def __init__(self, wd, proc, 
+                 config_f, dryrun= True, 
+                 max_cores= 1, mem_mb=-1):
         import os
+        import psutil
         self.proc= proc
         self.dryrun= dryrun
-        self.max_cores= max_cores
         self.config_f= config_f 
+        #' check and adjust the core number setting
+        cpu_count= int(psutil.cpu_count())
+        if (max_cores > cpu_count) or (max_cores < 1):
+            print(('The number of cpu was {}; cores setting '
+                  'adjusted').format(str(cpu_count)))
+            self.max_cores= max(int(cpu_count-1), 1)
+        else:
+            self.max_cores= int(max_cores)
+
+        #' check and adjust the memory size setting
+        freemem= psutil.virtual_memory().free/1e6
+        if (mem_mb > freemem) or (mem_mb <= 0):
+            print(('Currently free memory size was {}mb; memory setting '
+                  'adjusted').format(str(freemem)))
+            self.mem_mb= int(freemem * 0.8)
+        else:
+            self.mem_mb= int(mem_mb)
         
     def run_proc(self):
         proc= self.proc
-        dryrun= self.dryrun
+        dryrun= True if self.dryrun == 'Y' else False
         max_cores= self.max_cores
         config_f= self.config_f
         import os
@@ -20,6 +39,24 @@ class SGProcess:
         try:
             import snakemake
             os.environ['PATH']=env_dict['PATH']
+            if dryrun:
+                # test the environment and install if not yet ready
+                success=snakemake.snakemake(
+                    snakefile= env_dict['SNAKEFILE'],
+                    lock= False,
+                    restart_times= 3,
+                    cores= max_cores,
+                    resources= {'mem_mb': self.mem_mb}, 
+                    configfile=config_f,
+                    force_incomplete= True,
+                    workdir= os.path.dirname(config_f),
+                    use_conda=True,
+                    conda_prefix= os.path.join(env_dict['TOOL_HOME'], 'env'),
+                    #dryrun= dryrun,
+                    create_envs_only= True, 
+                    printshellcmds= True,
+                    notemp=True
+                    )
 
             ## run the process
             success=snakemake.snakemake(
@@ -27,6 +64,7 @@ class SGProcess:
                 lock= False,
                 restart_times= 3,
                 cores= max_cores,
+                resources= {'mem_mb': self.mem_mb}, 
                 configfile=config_f,
                 force_incomplete= True,
                 workdir= os.path.dirname(config_f),
@@ -65,6 +103,16 @@ class SGProcess:
         env_df= pd.read_csv(toolpaths_f, sep= '\t', comment= '#', index_col= 0)
         env_series=pd.Series([])
         env_dict= {}
+        try:
+            #' ensure the most important variable
+            assert 'SEQ2GENO_HOME' in os.environ
+        except AssertionError :
+            print('ERROR ({})'.format('SEQ2GENO_HOME'))
+            print('{}\t{}\n'.format(
+                datetime.now().isoformat(' ',timespec= 'minutes'),
+                'SEQ2GENO_HOME not properly set'))
+            sys.exit()
+
         try:
             env_series= env_df.loc[proc,:]
         except KeyError as ke:

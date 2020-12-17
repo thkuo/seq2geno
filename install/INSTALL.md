@@ -1,6 +1,13 @@
+<<<<<<< HEAD
 #### Step 1. check if Conda is installed
 
 #### Step 2. check where seq2geno is cloned
+=======
+_You might want to run the same procedures by running INSTALL.sh_
+
+#### Step 1. check if Conda is installed and the channels (as described in ../README.md) are included 
+#### Step 2. check where seq2geno is installed
+>>>>>>> db72a70f52fbe8b4f44b90b1119d43537e7cac5d
 It might look like `/YOUR/HOME/bin/seq2geno`
 
 #### Step 3. install the core environment
