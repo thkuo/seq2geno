@@ -1,5 +1,6 @@
 name: snakemake_env
 channels:
+  - hzi-bifo
   - bioconda
   - conda-forge
   - defaults

@@ -1,30 +1,44 @@
 #### Step 1. check if Conda is installed
-#### Step 2. check where seq2geno is installed
-It might look like `/YOUR/HOME/bin/seq2geno`
-#### Step 3. edit the environment variables and add the lines below in your ~/.profile
-```
-export SEQ2GENO_HOME=/YOUR/HOME/bin/seq2geno
-export PATH=$( realpath $SEQ2GENO_HOME )/main:$PATH
-```
 
-#### Step 4. install the core environment
+#### Step 2. check where seq2geno is cloned
+It might look like `/YOUR/HOME/bin/seq2geno`
+
+#### Step 3. install the core environment
 create the environment with the commands:
 ```
-conda env create -n snakemake_env --file=snakemake_env.yml
+export env_name=snakemake_env
+export env_dir=$( dirname $( dirname $( which conda ) ) )"/envs/"$env_name
+if [ -d $env_dir ]; then
+  echo $env_name" already exists"
+else
+  conda env create -n $env_name --file=snakemake_env.yml
+fi
+
+export SEQ2GENO_HOME=/YOUR/HOME/bin/seq2geno
+source activate $env_name
+echo enter $CONDA_PREFIX
+cd $CONDA_PREFIX
+mkdir -p ./etc/conda/activate.d
+mkdir -p ./etc/conda/deactivate.d
+touch ./etc/conda/activate.d/env_vars.sh
+echo "export SEQ2GENO_HOME="$SEQ2GENO_HOME >> ./etc/conda/activate.d/env_vars.sh
+echo "export PATH="$( realpath $SEQ2GENO_HOME )"/main:"$PATH >> ./etc/conda/activate.d/env_vars.sh
+touch ./etc/conda/deactivate.d/env_vars.sh
+echo "unset "$SEQ2GENO_HOME >> ./etc/conda/deactivate.d/env_vars.sh
+source deactivate
 ```
-We use the name "snakemake_env", but
-this might need changes if any previous environment is already named after it
-#### Step 5. test if the core environment 
+Yoou might need to replace `source activate` with `conda activate` 
+
+#### Step 4. test 
 ```
-source activate snakemake_env
+source activate $env_name
 seq2geno -h
 source deactivate
 ```
-Your conda might ask you to replace `source activate` with `conda activate` 
+That should show the usage about seq2geno.
 
-#### Step 6. install dependencies of Raory 
+#### Step 5. install dependencies of Raory 
 Roary already has its own script for installing dependencies, so we can simply use it:
-
 ```
 source activate snakemake_env
 cd $SEQ2GENO_HOME/denovo/lib/Roary
