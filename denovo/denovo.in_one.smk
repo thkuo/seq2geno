@@ -288,14 +288,14 @@ rule create_gff:
         os.path.join(out_prokka_dir, '{strain}', '{strain}.gff'), 
         os.path.join(out_prokka_dir, '{strain}', '{strain}.ffn')
     threads: 1
+    params: 
+        perl5lib_checker='update_perl5lib_for_prokka.sh'
     #conda: 'perl_for_prokka.yml'
     conda: 'prokka_env.yml'
     shell:
         '''
-        which prokka
-        export PROKKA_BIN=$( which prokka )
-	export PERL5LIB=$( dirname $PROKKA_BIN )/../perl5/:$PERL5LIB
-        echo $PERL5LIB
+        ## ensure PERL5LIB for prokka set correctly in the local environment
+        {params.perl5lib_checker}
         prokka --locustag {wildcards.strain} \
 --prefix  {wildcards.strain} \
 --force  --cpus {threads} --metagenome --compliant \
