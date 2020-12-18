@@ -99,18 +99,15 @@ rule bwa_pipeline:
         flatcount='{strain}.flatcount',
         rpg='{strain}.rpg',
         stat='{strain}.stats'
+    params:
+        update_perl5lib_script= 'update_perl5lib_for_bwa.sh'
     threads:1
     conda: 'snps_tab_mapping.yml'
     shell:
         """
-        set +u
-        export PERL5LIB=$CONDA_PREFIX/\
-lib/perl5/5.22.2/x86_64-linux-thread-multi/:$PERL5LIB
-        export PERL5LIB=$CONDA_PREFIX/lib/perl5/5.22.2:$PERL5LIB
-        export PERL5LIB=$CONDA_PREFIX/lib/perl5/site_perl/5.22.0:$PERL5LIB
+        {params.update_perl5lib_script}
         my_bwa_pipeline {wildcards.strain} {input.infile} \
 {input.reffile} {input.annofile} {input.Rannofile} 2> {wildcards.strain}.log
-        set -u
         """
 
 rule create_annot:
