@@ -242,43 +242,23 @@ strain= list(dna_reads.keys()))
     conda: 'perl5_22_env.yml'
     params:
         check_add_perl_env_script= 'install_perl_mods.sh',
-        check_add_software_script= 'set_roary_env.sh',
+        update_perl5lib_script= 'update_perl5lib_for_roary.sh',
+        update_path_script= 'update_paths_for_roary.sh',
         roary_bin= 'roary'
     threads: 16
     shell:
         '''
-        set +u
-#        {params.check_add_software_script}
-        ROARY_HOME=$(dirname $(dirname $(which roary)))
         # required perl modules
         {params.check_add_perl_env_script}
-
-	export PATH=\
-$ROARY_HOME/build/fasttree:\
-$ROARY_HOME/build/mcl-14-137/src/alien/oxygen/src:\
-$ROARY_HOME/build/mcl-14-137/src/shmcl:\
-$ROARY_HOME/build/ncbi-blast-2.4.0+/bin:\
-$ROARY_HOME/build/prank-msa-master/src:\
-$ROARY_HOME/build/cd-hit-v4.6.6-2016-0711:\
-$ROARY_HOME/build/bedtools2/bin:\
-$ROARY_HOME/build/parallel-20160722/src:\
-$PATH
-	export PERL5LIB=$ROARY_HOME/lib:\
-$ROARY_HOME/build/bedtools2/lib:$PERL5LIB
-#        PERL5LIB=$ROARY_HOME/lib:\
-#$ROARY_HOME/build/bedtools2/lib:\
-#$PERL5LIB
-#	ln -rsf $ROARY_HOME/lib/Bio $CONDA_PREFIX/lib/perl5/5.22.0/
+        # ensure accurate environmental variables
+        {params.update_path_script}
+        {params.update_perl5lib_script}
 	which perl
         echo $PERL5LIB
-        echo $PERLLIB
-        rm -r {wildcards.roary_dir}
+        [ ! -d {wildcards.roary_dir} ] || rm -r {wildcards.roary_dir}
         {params.roary_bin} -f {wildcards.roary_dir} \
 -v {input.gff_files} -p {threads} -g 100000 -z
-        set -u
         ''' 
-#        {params.roary_bin} -f {wildcards.roary_dir} \
-#-e -n -v {input.gff_files} -r -p 30 -g 100000 -z
 
 rule create_gff:
     #' Detect coding regions 
