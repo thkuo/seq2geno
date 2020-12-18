@@ -209,20 +209,15 @@ rule samtools_SNP_pipeline:
         raw_bcf='{strain}.raw.bcf',
         flt_vcf='{strain}.flt.vcf'
     params: 
-        min_depth= 0
+        min_depth= 0,
+        update_perl5lib_script= 'update_perl5lib_for_samtools.sh'
     threads:1
     conda: 'snps_tab_mapping.yml'
     shell:
         """
         sleep 10
-	set +u
-        export PERL5LIB=$CONDA_PREFIX/lib/perl5/site_perl/5.22.0:\
-$CONDA_PREFIX/lib/perl5/5.22.2:\
-$CONDA_PREFIX/lib/perl5/5.22.2/x86_64-linux-thread-multi/:\
-$PERL5LIB
-        echo $PERL5LIB
+        {params.update_perl5lib_script}
         my_samtools_SNP_pipeline {wildcards.strain} {input.reffile} {params.min_depth} 
-	set -u
         """
 
 rule bwa_pipeline_PE:
@@ -243,18 +238,16 @@ rule bwa_pipeline_PE:
         flatcount='{strain}.flatcount',
         rpg='{strain}.rpg',
         stat='{strain}.stats'
+    params:
+        update_perl5lib_script= 'update_perl5lib_for_bwa.sh'
     threads:1
     conda: 'snps_tab_mapping.yml'
     shell:
         """
-	set +u
-        export PERL5LIB=$CONDA_PREFIX/lib/perl5/5.22.2/x86_64-linux-thread-multi/:$PERL5LIB
-        export PERL5LIB=$CONDA_PREFIX/lib/perl5/5.22.2:$PERL5LIB
-        export PERL5LIB=$CONDA_PREFIX/lib/perl5/site_perl/5.22.0:$PERL5LIB
+        {params.update_perl5lib_script}
         my_bwa_pipeline_PE {wildcards.strain} \
 {input.infile1} {input.infile2} {input.reffile} \
 {input.annofile} {input.Rannofile} 2> {wildcards.strain}.log
-	set -u
         """
 
 rule redirect_and_preprocess_reads:
