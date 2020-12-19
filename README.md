@@ -57,8 +57,7 @@ The output data from Seq2Geno can be used to train phenotypic predictors using [
 
 - Installation of the environments 
 
-Please go to `install/` and either use the installer script `INSTALL.sh` or follow the instructions in `INSTALL.md`.
-
+Please go to `install/` and either 
 ```
 ./INSTALL.sh
 ```
@@ -72,11 +71,12 @@ Seq2Geno can launch with either the graphical user interface (GUI) or the comman
 
 Use the tool `seq2geno_gui` to read, edit, or save the arguments in a yaml file. Once the arguments are ready, the analyses can be launched with this interface; for large-scale researches, however, generating the yaml file and launching the analyses with the command line method (described below) might be more convenient, as having processes running in background should be more convenient. To learn more, please read the the manual in the main/ folder.
 
-It can be launched by sending no arguments and running
+It can be launched by running
 
 ```
 S2G
 ```
+(without arguments)
 
 - <a name="commandline"></a>command line
 
