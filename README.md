@@ -57,7 +57,7 @@ The output data from Seq2Geno can be used to train phenotypic predictors using [
 
 - Installation of the environments 
 
-Please go to `install/` and either use the installer 
+Please go to `install/` and either use the installer script `INSTALL.sh` or follow the instructions in `INSTALL.md`.
 
 ```
 ./INSTALL.sh
@@ -66,20 +66,27 @@ or manually complete the steps described in INSTALL.md
 
 ### <a name="usage"></a>Usage and Input
 
-Seq2Geno can launch with either the graphical user interface (GUI) or the command line.
+Seq2Geno can launch with either the graphical user interface (GUI) or the command line. 
 
 - <a name="gui"></a>GUI
 
 Use the tool `seq2geno_gui` to read, edit, or save the arguments in a yaml file. Once the arguments are ready, the analyses can be launched with this interface; for large-scale researches, however, generating the yaml file and launching the analyses with the command line method (described below) might be more convenient, as having processes running in background should be more convenient. To learn more, please read the the manual in the main/ folder.
 
+It can be launched by sending no arguments and running
+
+```
+S2G
+```
+
 - <a name="commandline"></a>command line
 
-The input for seq2geno is a single yaml file describing all arguments:
+The input for command line usage mainly requires an yaml file that describes all arguments:
+
 ```
-  seq2geno -d -f [options_yaml] -l [log_file]
+  S2G -d -f [yaml] -l [log]
 ```
 
-The [options\_yaml] describes all the options and input data for Seq2Geno. The [log\_file] should be a non-existing filename to store the log information; if not set, the messages will be directed to stdout and stderr.
+The [yaml] file should describes all the options and input data for Seq2Geno. The [log] should be a non-existing filename to store the log information; if not set, the messages will be directed to stdout and stderr.
 
 - <a name="args"></a>arguments
 
@@ -150,11 +157,7 @@ To only create the folder and config files, please turn off the last six options
 [Geno2Pheno](https://genopheno.bifo.helmholtz-hzi.de) requires all input data packed in a single zip file. The input file for the validator and gnerator of that zip file can be generated using submission\_tool/create\_genyml.py. 
 
 ### <a name="example"></a>Example usages and data
-The tutorials and example data and commands can be found in  __example\_sg\_dataset.tar.gz__ by decompressing it:
-
-```
-tar zxvf ./example_sg_dataset.tar.gz 
-```
+The tutorial and example data and commands can be found in `example_sg_dataset/`.  
 
 
 ### <a name="FAQ"></a>FAQ

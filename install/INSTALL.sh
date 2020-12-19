@@ -4,9 +4,9 @@ echo 'SEQ2GENO_HOME is '$SEQ2GENO_HOME
 
 ## ensure conda channels
 {
-	echo 'check conda channels'
+	echo '+check conda channels...'
 	for c in hzi-bifo conda-forge/label/broken bioconda conda-forge defaults; do 
-		echo $c'...'
+		echo '+'$c
 		if [ $(conda config --get channels | grep $c | wc -l) -eq 0 ]; then
 			conda config --add channels $c
 		fi
@@ -18,9 +18,14 @@ echo 'SEQ2GENO_HOME is '$SEQ2GENO_HOME
 
 ## download the core environment
 {
-  conda activate snakemake_env || source activate snakemake_env
+	conda activate snakemake_env || source activate snakemake_env
+	echo '-----'
+	echo 'Naming conflict: an existing environment is also called "snakemake_env".'
+	echo 'Please remove it (with or without cloning it with other names).'
+	exit
 } || {
   {
+	## if not existing
 	echo 'enter install/'
 	cd install
 	conda env create -n snakemake_env --file=snakemake_env.yml
@@ -32,7 +37,7 @@ echo 'SEQ2GENO_HOME is '$SEQ2GENO_HOME
 
 # set up environmental variables
 { 
-  conda activate snakemake_env || source activate snakemake_env
+	conda activate snakemake_env || source activate snakemake_env
 }
 {
 	echo 'set up core environment'
@@ -46,8 +51,8 @@ echo 'SEQ2GENO_HOME is '$SEQ2GENO_HOME
 	touch $DEACTIVATE_ENVVARS
 
 	echo 'export SEQ2GENO_HOME='$SEQ2GENO_HOME > $ACTIVATE_ENVVARS
-	echo 'export PATH_BACKUP='$PATH >> $ACTIVATE_ENVVARS
-	echo 'export PATH='$SEQ2GENO_HOME/main:$PATH >> $ACTIVATE_ENVVARS
+	echo 'export PATH_BACKUP=$PATH' >> $ACTIVATE_ENVVARS
+	echo 'export PATH='$SEQ2GENO_HOME'/main:$PATH' >> $ACTIVATE_ENVVARS
 
 	echo 'unset SEQ2GENO_HOME' > $DEACTIVATE_ENVVARS
 	echo 'export PATH=$PATH_BACKUP' >> $DEACTIVATE_ENVVARS
@@ -72,10 +77,11 @@ echo 'SEQ2GENO_HOME is '$SEQ2GENO_HOME
 ## decompress the example dataset to install the process-specific environments
 {
   	echo $( realpath . )
-	echo 'extract example dataset'
+	echo '+extract example dataset'
 	tar -zxvf example_sg_dataset.tar.gz 
-	cd example_sg_dataset/
+	cd $SEQ2GENO_HOME/example_sg_dataset/
 	./CONFIG.sh
+	echo '+install process-specific environments and dryrun the procedures for the example dataset'
 	seq2geno -f ./seq2geno_inputs.yml
 }||{
 	echo "Errors in installation of the process-specific environments failed"
@@ -84,5 +90,10 @@ echo 'SEQ2GENO_HOME is '$SEQ2GENO_HOME
 {
 	conda deactivate || source deactivate
 }
+
+## Finalize
+mv $SEQ2GENO_HOME/main/S2G $SEQ2GENO_HOME
 echo '-----'
-echo 'Environments installed! You might want to go to example_sg_dataset/ and try. '
+echo 'Environments installed! You should saw the launcher "S2G" in '$SEQ2GENO_HOME' and might also want to: '
+echo '- copy '$SEQ2GENO_HOME'/S2G to a certain idirectory that is already included in your PATH variable '
+echo '- go to '$SEQ2GENO_HOME'/example_sg_dataset/ and try'

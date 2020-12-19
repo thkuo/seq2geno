@@ -53,3 +53,16 @@ cd $SEQ2GENO_HOME/denovo/lib/Roary
 source deactivate
 ```
 These softwares should now be available under `$SEQ2GENO_HOME/denovo/lib/Roary/build`.
+
+#### Step 6. install process-specific environments and dryrun the procedures for the example dataset
+```
+cd $SEQ2GENO_HOME
+tar -zxvf example_sg_dataset.tar.gz 
+cd example_sg_dataset/
+./CONFIG.sh
+seq2geno -f ./seq2geno_inputs.yml
+```
+
+#### Step 7. 
+
+Move the seq2geno launcher `$SEQ2GENO_HOME/main/S2G` to a certain idirectory that is already included in your PATH variable; alternatively, you could add `$SEQ2GENO_HOME/main` to your PATH variable and edit either `~/.profile` or `~/.bashrc` accordingly. 
