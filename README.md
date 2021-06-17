@@ -1,7 +1,7 @@
 # Seq2Geno
 
 An integrated tool for microbial sequence analyses. The methods are refactored
-from those used by [the published research](https://zenodo.org/record/3591847/export/hx#.YL89KyaxWV5). The method reproducibility has beend evaulated with the same raw data but a differnet mechine.
+from those used by [the published research](https://zenodo.org/record/3591847/export/hx#.YL89KyaxWV5). The method reproducibility has beend evaulated with the same raw data using a differnet mechine.
 
 - [Repository structure](#structure)
 - [Available functions](#functions) 
@@ -62,9 +62,15 @@ This repository includes:
 	git submodule update --init --recursive
 	```
 
-	The option `--recurse-submodules` helps to download the submodules that are located at another repository (i.e. Seq2Geno and Geno2Pheno). The flag is available only in git version >2.13, and users of earlier git versions may need to find the substitute.  
+The command uses **--recurse-submodules** to download the submodules. The flag is available only in git version >2.13. Earlier git versions might have the substitute. After the package is downloaded, *main/seq2geno* and *main/seq2geno_gui* are the executable scripts for Seq2Geno. 
 
-- Installation of the environments 
+- For only ensuring the environemnt:
+
+You might want to use the automatic tool *install/SETENV.sh* or follow the steps in *install/README.md*. The methods will help you to set environment variables, check python packages, etc.
+
+- For setting up the environment and installing the process-specific software
+
+You might want to use the automatic tool *install/INSTALL.sh* or follow the steps in *install/README.md*. Besides those covered by *install/SETENV.sh*, this script will help you to further download the process-specific software such as samtools, etc.
 
 Please go to `install/` and either use the `INSTALL.sh` or follow the manual `INSTAL.md`. 
 
