@@ -19,17 +19,6 @@ from pprint import pprint
 import subprocess
 
 import UserOptions
-# >>>>
-# Appearance attributes
-# fieldname_font=("Helvetica",12,"bold")
-# def fieldname_cols(is_optional):
-#    '''
-#    field names colored by optional and mandatory fields
-#    '''
-#    return('red' if not is_optional else 'black')
-
-# >>>>
-# Target values to determine
 
 config_dict = dict()
 func_dict = dict()
@@ -337,34 +326,40 @@ def write_yaml(func_dict, config_dict):
         return(yml_f)
 
 
-def load_old_log(out):
-    '''
-    Read the old log file to allow the user to know the current status
-    '''
+def load_and_display_old_log(out):
+    # Read the old log file to allow the user to know the current status
+    #
     # open the log file
-    import UserOptions 
+    import UserOptions
     import os
     log_f = filedialog.askopenfilename(title='select file',
                                        initialdir='.',
-                                       filetypes=[('log', '*.log'),
+                                       filetypes=[('log', '*log'),
                                                   ('all', '*')])
     primary_dict['log_f'].set(log_f)
+    parse_log(out, log_f)
 
+
+def parse_log(out, log_f):
     # print the information in the log file
     yml_f = ''
     out.delete('1.0', tk.END)
-    with open(log_f, 'r') as log_fh:
-        for l in log_fh.readlines():
-            is_config_line = re.search('#CONFIGFILE:(.+)', l.strip())
-            if is_config_line is not None:
-                yml_f = is_config_line.group(1)
-            else:
-                out.insert(tk.END, l)
-    # set the arguments same as the config file that generated the log
-    assert os.path.isfile(yml_f), ('Config file "{}" described in the '
-                                   'log not found or broken'.format(
-                                       yml_f))
-    reset_args_with_yml(yml_f)
+    if os.path.isfile(log_f) and (os.stat(log_f).st_size > 0):
+        # ensure non-empty file to open
+        with open(log_f, 'r') as log_fh:
+            for line in log_fh.readlines():
+                is_config_line = re.search('#CONFIGFILE:(.+)',
+                                           line.strip())
+                if is_config_line is not None:
+                    yml_f = is_config_line.group(1)
+                    if os.path.isfile(yml_f):
+                        reset_args_with_yml(yml_f)
+                    else:
+                        print('Config file "{}" described in the '
+                              'log not found or broken'.format(
+                                  yml_f))
+                else:
+                    out.insert(tk.END, line)
 
 
 class seq2geno_gui:
@@ -420,7 +415,8 @@ class seq2geno_gui:
             label='Save yaml',
             command=partial(write_yaml, func_dict, config_dict))
         filemenu.add_command(label='Load log',
-                             command=partial(load_old_log, v_box))
+                             command=partial(load_and_display_old_log,
+                                             v_box))
         filemenu.add_command(label='Run', command=self.exec)
         filemenu.add_command(label='Exit', command=win_root.quit)
         win_menubar.add_cascade(menu=filemenu, label='File')
@@ -512,5 +508,3 @@ if __name__ == '__main__':
     win_root.title('Seq2Geno: data preparation stage of Seq2Geno2Pheno')
     seq2geno_gui = seq2geno_gui(win_root)
     seq2geno_gui.show()
-#    print(seq2geno_gui.extract_args().__dict__)
-#    seq2geno_gui.exec()
