@@ -2,6 +2,7 @@
 
 # SPDX-FileCopyrightText: 2021 Tzu-Hao Kuo
 #
+# SPDX-License-Identifier: GPL-3.0-or-later
 # SPDX-License-Identifier: GPL3
 
 # Parse the arguments through the GUI
@@ -19,6 +20,7 @@ from pprint import pprint
 import subprocess
 
 import UserOptions
+from LoadFile import LoadFile
 
 config_dict = dict()
 func_dict = dict()
@@ -51,16 +53,6 @@ def browse_file_and_update(field):
                                                    ('.fa', '*.fa')])
     # update the value
     config_dict[field].set(f_name)
-
-#def browse_primary_file_and_update(field): 
-#    '''
-#    allow the user to select a file using the file browser and
-#    auto-fill the textbox
-#    '''
-#    f_name= filedialog.asksaveasfilename(title= 'set filename', 
-#                                initialdir= '.')
-#    #' update the value
-#    primary_dict[field].set(f_name)
 
 
 def make_primary_file_field(root, field, is_optional=False):
@@ -175,9 +167,6 @@ def makeform_general(root, args_dict):
         else:
             # other types of arguments
             make_file_field_shared(row, field)
-#        hlp = ttk.Label(row, text=args_dict[field]['help'], anchor='w')
-#        hlp.configure(font=('new century schoolbook', 11), foreground= 'grey80')
-#        hlp.pack(side=tk.LEFT, fill= tk.X)
 
 
 def makeform_functions(root, func_options):
@@ -205,32 +194,6 @@ def makeform_functions(root, func_options):
         hlp.pack(side=tk.LEFT, fill=tk.X)
 
 
-#def func_name_adaptor(d):
-#    '''
-#    Becasue the function names used in the main script is abbreviated,
-#    this interface describe thw workflows in a more understoodable way.
-#    To allow the main script recognize them,
-#    this adaptor convert the names and values
-#    '''
-#    #' ensure the datatype first
-#    assert isinstance(d, dict)
-#    #' the dictionary for the conversion
-#    func_name_adaptor={ 'mode': 'dryrun',
-#            'snps': 'snps',
-#            'denovo': 'denovo',
-#            'expr':'expr',
-#            'phylo':'phylo',
-#            'ar':'ar',
-#            'de': 'de'  }
-#    func_val_adaptor= { 'include': 'Y', 'skip': 'N',
-#                       'dryrun': 'Y','execute': 'N'}
-#    new_d= dict()
-#    for k in func_name_adaptor:
-#        old_val= d[k]
-#        new_val= func_val_adaptor[old_val]
-#        new_key= func_name_adaptor[k]
-#        new_d[new_key]= new_val
-#    return(new_d)
 
 def load_theme(root):
     parent_d = os.path.dirname(__file__)
@@ -270,7 +233,7 @@ def make_arguments_for_main(func_dict, config_dict, argspace):
 
 
 def read_arguments_space(as_f):
-    as_fh = open(as_f, 'r')
+    as_fh = LoadFile(as_f)
     args = yaml.safe_load(as_fh)
     as_fh.close()
     return(args)
@@ -321,7 +284,7 @@ def write_yaml(func_dict, config_dict):
                                          initialdir='.')
     if len(yml_f) > 0:
         primary_dict['yml_f'].set(yml_f)
-        with open(yml_f, 'w') as yml_fh:
+        with LoadFile(yml_f) as yml_fh:
             yaml.safe_dump(arg_dict, yml_fh)
         return(yml_f)
 
@@ -330,8 +293,6 @@ def load_and_display_old_log(out):
     # Read the old log file to allow the user to know the current status
     #
     # open the log file
-    import UserOptions
-    import os
     log_f = filedialog.askopenfilename(title='select file',
                                        initialdir='.',
                                        filetypes=[('log', '*log'),
@@ -344,22 +305,18 @@ def parse_log(out, log_f):
     # print the information in the log file
     yml_f = ''
     out.delete('1.0', tk.END)
-    if os.path.isfile(log_f) and (os.stat(log_f).st_size > 0):
-        # ensure non-empty file to open
-        with open(log_f, 'r') as log_fh:
-            for line in log_fh.readlines():
-                is_config_line = re.search('#CONFIGFILE:(.+)',
-                                           line.strip())
-                if is_config_line is not None:
-                    yml_f = is_config_line.group(1)
-                    if os.path.isfile(yml_f):
-                        reset_args_with_yml(yml_f)
-                    else:
-                        print('Config file "{}" described in the '
-                              'log not found or broken'.format(
-                                  yml_f))
-                else:
-                    out.insert(tk.END, line)
+    with LoadFile(log_f) as log_fh:
+        for l in log_fh.readlines():
+            is_config_line = re.search('#CONFIGFILE:(.+)', l.strip())
+            if is_config_line is not None:
+                yml_f = is_config_line.group(1)
+            else:
+                out.insert(tk.END, l)
+    # set the arguments same as the config file that generated the log
+    assert os.path.isfile(yml_f), ('Config file "{}" described in the '
+                                   'log not found or broken'.format(
+                                       yml_f))
+    reset_args_with_yml(yml_f)
 
 
 class seq2geno_gui:
@@ -480,7 +437,7 @@ class seq2geno_gui:
             label.configure(font=('nimbus mono l', 12))
             label.pack(side="top", fill=tk.X)
             popup_msgframe.pack(side=tk.TOP)
-            for l in open(f, 'r').readlines():
+            for l in LoadFile(f).readlines():
                 label.insert(tk.END, l)
             popup_butframe = ttk.Frame(popup)
             end_but = ttk.Button(popup_butframe, text="okay",
