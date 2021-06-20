@@ -3,7 +3,6 @@
 # SPDX-FileCopyrightText: 2021 Tzu-Hao Kuo
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-# SPDX-License-Identifier: GPL3
 
 # Determine, initiate and launch the workflows based on user-defined
 # arguments
@@ -15,6 +14,7 @@ from SGProcesses import SGProcess
 import UserOptions
 from CollectResults import collect_results
 import LogGenerator
+import shutil
 
 # ensure the core environment variable
 assert 'SEQ2GENO_HOME' in os.environ, 'SEQ2GENO_HOME not available'
@@ -174,7 +174,7 @@ if __name__ == '__main__':
         else:
             output_zip = '{}.zip'.format(args.wd)
             packer = SGOutputPacker(seq2geno_outdir=args.wd,
-                          output_zip=output_zip)
+                                    output_zip=output_zip)
             if primary_args.pack_output == 'all':
                 logger.info('Packing all data')
                 packer.pack_all_output()

@@ -3,8 +3,6 @@
 # SPDX-FileCopyrightText: 2021 Tzu-Hao Kuo
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-# SPDX-License-Identifier: GPL3
-
 # Parse the arguments through the GUI
 
 import tkinter as tk
@@ -18,7 +16,6 @@ import yaml
 import re
 from pprint import pprint
 import subprocess
-
 import UserOptions
 from LoadFile import LoadFile
 
@@ -26,15 +23,10 @@ config_dict = dict()
 func_dict = dict()
 primary_dict = dict()
 
-# >>>>
-# functions
-
 
 def browseDirs(field):
-    '''
-    allow the user to select a directory using the file browser and
-    auto-fill the textbox
-    '''
+    # allow the user to select a directory using the file browser and
+    # auto-fill the textbox
     d_name = filedialog.askdirectory(title='select directory',
                                      initialdir='.')
     # update the value
@@ -42,10 +34,8 @@ def browseDirs(field):
 
 
 def browse_file_and_update(field):
-    '''
-    allow the user to select a file using the file browser and
-    auto-fill the textbox
-    '''
+    # allow the user to select a file using the file browser and
+    # auto-fill the textbox
     f_name = filedialog.askopenfilename(title='select file',
                                         initialdir='.',
                                         filetypes=[('all', '*'),
@@ -54,6 +44,25 @@ def browse_file_and_update(field):
     # update the value
     config_dict[field].set(f_name)
 
+<<<<<<< HEAD
+=======
+
+def make_primary_choices_field(root, field, choices):
+    # the row
+    row = ttk.Frame(root)
+    row.pack(side=tk.TOP, fill=tk.X, padx=5, pady=3)
+    # name of this field
+    lab = ttk.Label(row, width=15, text=field)
+    lab.pack(side=tk.LEFT)
+    # the choices
+    primary_dict[field] = tk.StringVar(row)
+    dropdown = ttk.Combobox(row, values=choices,
+                            textvariable=primary_dict[field])
+    dropdown.current(0)
+    dropdown.configure(font=('nimbus mono l', 12))
+    dropdown.pack(side=tk.RIGHT, expand=tk.YES, fill=tk.X)
+
+>>>>>>> ec21a7313... resolve merging conflict
 
 def make_primary_file_field(root, field, is_optional=False):
     # the row
@@ -68,37 +77,29 @@ def make_primary_file_field(root, field, is_optional=False):
     ent = ttk.Entry(row, textvariable=primary_dict[field])
     ent.configure(font=('nimbus mono l', 12))
     ent.pack(side=tk.RIGHT, expand=tk.YES, fill=tk.X)
-#    if is_optional:
-#        optout_but= ttk.Button(row, text= 'skip', width= 6, 
-#                               command=partial(field_opt_out, field))
-#        optout_but.pack(side=tk.RIGHT, padx=5, pady=5)
-#    but= ttk.Button(row, text= 'browse', width= 10, command= partial(browse_primary_file_and_update, field))
-#    but.pack(side=tk.RIGHT, padx=5, pady=5)
 
 
 def makeform_primary(root, args_dict):
-    '''
-    create the form for determining input data
-    '''
+    # create the form for determining input data
     for field in args_dict:
         if args_dict[field]['class'] == 'file':
             # arguments of filenames
             make_primary_file_field(
                 root, field,
                 (True if len(args_dict[field]['pattern']) == 0 else False))
+        elif args_dict[field]['class'] == 'choices':
+            make_primary_choices_field(
+                root, field, args_dict[field]['choices'])
 
 
 def field_opt_out(field):
-    '''
-    For the optional arguments, update the value with "-"
-    '''
+    # For the optional arguments, update the value with "-"
     config_dict[field].set('-')
 
 
 def make_file_field_shared(root, field, is_optional=False):
-    '''
-    the field name and the textbox for all fields in common
-    '''
+    # The field name and the textbox for all fields in common
+    #
     # the row
     row = ttk.Frame(root)
     row.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
@@ -113,10 +114,9 @@ def make_file_field_shared(root, field, is_optional=False):
     ent.pack(side=tk.RIGHT, expand=tk.YES, fill=tk.X)
     return(row)
 
+
 def make_file_field(root, field, is_optional=False):
-    '''
-    the fields where the value should be a file
-    '''
+    # The fields where the value should be a file
     row = make_file_field_shared(root, field, is_optional)
     if is_optional:
         optout_but = ttk.Button(row, text='skip', width=6,
@@ -128,9 +128,7 @@ def make_file_field(root, field, is_optional=False):
 
 
 def make_dir_field(root, field):
-    '''
-    the fields where the value should be a directory
-    '''
+    # The fields where the value should be a directory
     row = make_file_field_shared(root, field)
     but = ttk.Button(row, text='browse', width=10,
                      command=partial(browseDirs, field))
@@ -147,16 +145,14 @@ def make_bool_field(row, field):
 
 
 def makeform_general(root, args_dict):
-    '''
-    create the form for determining input data
-    '''
+    # Create the form for determining input data
     for field in args_dict:
         row = ttk.Frame(root)
         row.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
         if args_dict[field]['class'] == 'file':
             # arguments of filenames
             make_file_field(
-                row, field, 
+                row, field,
                 (True if len(args_dict[field]['pattern']) == 0 else False))
         elif args_dict[field]['class'] == 'dir':
             # arguments of directories
@@ -170,9 +166,7 @@ def makeform_general(root, args_dict):
 
 
 def makeform_functions(root, func_options):
-    '''
-    options of functions
-    '''
+    # options of functions
     for func in func_options:
         row = ttk.Frame(root)
         row.pack(side=tk.TOP, padx=5, pady=5, fill=tk.X)
@@ -182,7 +176,7 @@ def makeform_functions(root, func_options):
 
         func_dict[func] = tk.StringVar(row)
         # the options
-        # becareful if shifted from ttk.OptionMenu differ to tk.OptionMenu 
+        # becareful if shifted from ttk.OptionMenu differ to tk.OptionMenu
         opt_but = ttk.OptionMenu(row, func_dict[func],
                                  func_options[func]['options'][0],
                                  *func_options[func]['options'])
@@ -194,7 +188,10 @@ def makeform_functions(root, func_options):
         hlp.pack(side=tk.LEFT, fill=tk.X)
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> ec21a7313... resolve merging conflict
 def load_theme(root):
     parent_d = os.path.dirname(__file__)
     awtheme_d = os.path.join(parent_d, 'GUIutils', 'theme', 'awthemes-10.0.0')
@@ -206,9 +203,7 @@ def load_theme(root):
 
 
 def make_arguments_for_main(func_dict, config_dict, argspace):
-    ''' 
-    prepare the argument object for Seq2Geno
-    '''
+    # prepare the argument object for Seq2Geno
     # encode the boolean variables
     # features section
     func_plainstr_dict = {k: func_dict[k].get() for k in func_dict}
@@ -216,7 +211,6 @@ def make_arguments_for_main(func_dict, config_dict, argspace):
     pprint(func_dict_for_main)
     # general section
     config_plainstr_dict = {k: config_dict[k].get() for k in config_dict}
-    config_dict_for_main = config_plainstr_dict
     pprint(config_plainstr_dict)
 
     # create the arguments object
@@ -240,9 +234,7 @@ def read_arguments_space(as_f):
 
 
 def load_old_yaml():
-    '''
-    Allow the user to select the old yaml file and parse the arguments
-    '''
+    # Allow the user to select the old yaml file and parse the arguments
     yml_f = filedialog.askopenfilename(title='select file',
                                        initialdir='.',
                                        filetypes=[('yml', '*.yml'),
@@ -265,16 +257,11 @@ def reset_args_with_yml(yml_f):
         for k in config_dict:
             if hasattr(old_args, k):
                 arg_val = getattr(old_args, k)
-                #print('{}: {} '.format(k, config_dict[k].get()))
                 config_dict[k].set(arg_val)
-                #print('---> {}'.format(config_dict[k].get()))
 
 
 def write_yaml(func_dict, config_dict):
-    '''
-    Save the settings
-    '''
-    import yaml
+    # Save the settings
     func_plainstr_dict = {k: func_dict[k].get() for k in func_dict}
     config_plainstr_dict = {k: config_dict[k].get() for k in config_dict}
     arg_dict = {'features': func_plainstr_dict,
@@ -305,18 +292,22 @@ def parse_log(out, log_f):
     # print the information in the log file
     yml_f = ''
     out.delete('1.0', tk.END)
-    with LoadFile(log_f) as log_fh:
-        for l in log_fh.readlines():
-            is_config_line = re.search('#CONFIGFILE:(.+)', l.strip())
-            if is_config_line is not None:
-                yml_f = is_config_line.group(1)
-            else:
-                out.insert(tk.END, l)
-    # set the arguments same as the config file that generated the log
-    assert os.path.isfile(yml_f), ('Config file "{}" described in the '
-                                   'log not found or broken'.format(
-                                       yml_f))
-    reset_args_with_yml(yml_f)
+    if os.path.isfile(log_f) and (os.stat(log_f).st_size > 0):
+        # ensure non-empty file to open
+        with LoadFile(log_f) as log_fh:
+            for line in log_fh.readlines():
+                is_config_line = re.search('#CONFIGFILE:(.+)',
+                                           line.strip())
+                if is_config_line is not None:
+                    yml_f = is_config_line.group(1)
+                    if os.path.isfile(yml_f):
+                        reset_args_with_yml(yml_f)
+                    else:
+                        print('Config file "{}" described in the '
+                              'log not found or broken'.format(
+                                  yml_f))
+                else:
+                    out.insert(tk.END, line)
 
 
 class seq2geno_gui:
@@ -324,9 +315,7 @@ class seq2geno_gui:
         self.win_root = root
 
     def show(self):
-        '''
-        Make the interface
-        '''
+        # Make the interface
         win_root = self.win_root
         parent_d = os.path.dirname(__file__)
 
@@ -401,12 +390,12 @@ class seq2geno_gui:
         win_root.mainloop()
 
     def exec(self):
-        '''
-        Instead of replacing the command line interface,
-        the GUI is a an adaptor between the user and the command line interface
-        Therefore, launching seq2geno from this GUI simply is passing
-        the needed primary arguments: the yaml filename and the log filename
-        '''
+        # Instead of replacing the command line interface,
+        # the GUI is a an adaptor between the user and the command line
+        # interface. Therefore, launching seq2geno from this GUI
+        # simply is passing the needed primary arguments: the yaml
+        # filename and the log filename
+
         # save the yaml to ensure the input
         yml_f = write_yaml(func_dict, config_dict)
         # determine log path
@@ -414,16 +403,17 @@ class seq2geno_gui:
         if os.path.isfile(log_f):
             self.make_popupmsg(title='Log file existing',
                                msg='Please try another filename.')
+        # whether to zip the output folder or not
+        pack_output = primary_dict['pack_output'].get()
         # start running
-        cmd_d = ['seq2geno', '-f', yml_f]
+        cmd_d = ['seq2geno', '-f', yml_f, '--outzip', pack_output]
         if not (re.search('\w', log_f) is None):
             cmd_d = cmd_d + ['-l', log_f]
+        print(cmd_d)
         subprocess.Popen(cmd_d)
 
     def make_popupmsg(self, title, msg=None, f=''):
-        '''
-        Generate a popup to show message
-        '''
+        # Generate a popup to show message
         popup = tk.Tk()
         popup.wm_title(title)
         if msg is not None:
@@ -437,8 +427,8 @@ class seq2geno_gui:
             label.configure(font=('nimbus mono l', 12))
             label.pack(side="top", fill=tk.X)
             popup_msgframe.pack(side=tk.TOP)
-            for l in LoadFile(f).readlines():
-                label.insert(tk.END, l)
+            for line in LoadFile(f).readlines():
+                label.insert(tk.END, line)
             popup_butframe = ttk.Frame(popup)
             end_but = ttk.Button(popup_butframe, text="okay",
                                  command=popup.destroy)
@@ -448,9 +438,7 @@ class seq2geno_gui:
         popup.mainloop()
 
     def extract_args(self):
-        '''
-        Display how Seq2Geno will recognize those arguments
-        '''
+        # Display how Seq2Geno will recognize those arguments
         # collect the arguments
         args_for_main = make_arguments_for_main(func_dict,
                                                 config_dict,
